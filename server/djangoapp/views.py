@@ -1,4 +1,3 @@
-# Uncomment the required imports before adding the code
 from .models import CarMake, CarModel
 
 from django.shortcuts import render
@@ -63,7 +62,14 @@ def registration(request):
 # a list of dealerships
 # def get_dealerships(request):
 # ...
-
+#Update the `get_dealerships` render list of dealerships all by default, particular state if state is passed
+def get_dealerships(request, state="All"):
+    if(state == "All"):
+        endpoint = "/fetchDealers"
+    else:
+        endpoint = "/fetchDealers/"+state
+    dealerships = get_request(endpoint)
+    return JsonResponse({"status":200,"dealers":dealerships})
 # Create a `get_dealer_reviews` view to render the reviews of a dealer
 # def get_dealer_reviews(request,dealer_id):
 # ...
@@ -74,6 +80,17 @@ def registration(request):
 
 # Create a `add_review` view to submit a review
 # def add_review(request):
+def add_review(request):
+    if(request.user.is_anonymous == False):
+        data = json.loads(request.body)
+        try:
+            response = post_review(data)
+            return JsonResponse({"status":200})
+        except:
+            return JsonResponse({"status":401,"message":"Error in posting review"})
+    else:
+        return JsonResponse({"status":403,"message":"Unauthorized"})
+# ...
 def get_cars(request):
     count = CarMake.objects.filter().count()
     print(count)
